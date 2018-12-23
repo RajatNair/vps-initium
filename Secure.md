@@ -56,11 +56,47 @@ sudo ufw enable && sudo ufw status
 ```
 ###### 7. Install fail2ban
 ```shell
-sudo apt-get install fail2ban
+# Sendmail to send email alerts of bans
+sudo apt-get install fail2ban sendmail
 sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+```
+Edit the config file to add sample content shown below -
+```shell
 sudo nano /etc/fail2ban/jail.local
-sudo service fail2ban restart
+```
+Sample
+```yaml
+[DEFAULT]
+# email address to receive notifications.
+destemail = root@localhost    
+# the email address from which to send emails.
+sender = root@your-domain-name    
+# name on the notification emails.
+sendername = fail2ban
+# email transfer agent to use. 
+mta = sendmail
+
+# see action.d/ufw.conf
+actionban = ufw.conf
+# see action.d/ufw.conf 
+actionunban = ufw.conf   
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+# the length of time between login attempts for maxretry. 
+findtime = 600
+# attempts from a single ip before a ban is imposed.
+maxretry = 5
+# the number of seconds that a host is banned for.
+bantime = 3600
+```
+```shell
+sudo systemctl restart fail2ban
 # Verify with
+sudo fail2ban-client status
+# And
 sudo iptables -L
 ```
 
